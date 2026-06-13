@@ -1,173 +1,387 @@
-# cnn-object-detection
+# 🚗 CNN Object Detection: License Plate Detection
 
-<a href="https://colab.research.google.com/github/kekele-star/number-plate-detection/blob/main/train-set.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-Topic: Introduction to Object Detection
-Content
-Overview of Object Detection
-1.1 Key Components of Object Detection Models
-1.2  Popular Object Detection Models
-1.3 Tools and Libraries
-Data Prepapration & Exploration
-2.1 Data Formats
-2.2 Data Annotation
-Inference with Pre-trained Models
-Evaluation Metrics
-4.1 Common Metrics
-Finetuning a Pretrained Model on License Plate Dataset
+<p align="center">
+  <a href="https://colab.research.google.com/github/kekele-star/number-plate-detection/blob/main/train-set.ipynb">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+  </a>
+</p>
 
-<a name="part1"></a>
-Overview of Object Detection
-Object detection is a computer vision technique that involves identifying and locating objects within an image or video. Unlike image classification, which assigns a single label to an image, object detection provides both the label and the coordinates of bounding boxes for each object. Popular applications include autonomous driving, security surveillance, and image search engines.
-<div align="center">
-  <img src="https://www.ibm.com/content/dam/connectedassets-adobe-cms/worldwide-content/creative-assets/s-migr/ul/g/68/ae/object-detection-figure-1.component.complex-narrative-xl.ts=1713813010967.jpg/content/adobe-cms/us/en/topics/object-detection/jcr:content/root/table_of_contents/body/content_section_styled/content-section-body/complex_narrative/items/content_group_745532756/image" alt="Labeling GIF" width="800" height="800">
-</div>
-<a name="part1.1"></a>
-Key Components of Object Detection Models
-1. Feature Extraction
-Convolutional Neural Networks (CNNs): CNNs are the backbone of many object detection models. They are used to extract features from images through convolutional layers, pooling layers, and activation functions.
-Pre-trained Models: Using models pre-trained on large datasets (e.g., ImageNet) helps in leveraging learned features and reduces training time.
-2. Region Proposal
-Selective Search: An algorithm that proposes possible object regions by combining similar regions based on color, texture, size, and shape.
-Region Proposal Networks (RPNs): Networks that generate object proposals directly from feature maps, commonly used in models like Faster R-CNN.
-3. Classification and Localization
-Bounding Box Regression: A technique used to predict the coordinates of the bounding box around detected objects.
-Object Classification: Assigning a label to each detected object using fully connected layers and softmax activation.
-4. Anchor Boxes
-Pre-defined bounding boxes of different sizes and aspect ratios used to detect objects at various scales and shapes. Commonly utilized in models like YOLO and SSD.
-5. Loss Functions
-Classification Loss: Measures the accuracy of predicted object classes.
-Localization Loss: Measures the accuracy of predicted bounding box coordinates.
-Total Loss: A combination of classification and localization losses to optimize the model.
-6. Post-Processing
-Non-Maximum Suppression (NMS): An algorithm used to remove redundant bounding boxes and keep only the most accurate ones.
-
-<a name="part1.2"></a>
-Popular Object Detection Models
-1. R-CNN (Regions with CNN features)
-Architecture: Extracts region proposals using Selective Search, then uses a CNN to extract features from each region, followed by classification using a linear SVM.
-<div align="center">
-  <img src="https://miro.medium.com/v2/resize:fit:640/format:webp/1*yJBiHhK8t_zTQKBqlZKlWQ.png" alt="Labeling GIF" width="800" height="500">
-</div>
-2. Fast R-CNN
-Architecture: Improves upon R-CNN by sharing convolutional computations and using a single-stage training process. It uses Region of Interest (RoI) pooling to extract fixed-size feature maps for each region proposal.
-<div align="center">
-  <img src="https://miro.medium.com/v2/resize:fit:640/format:webp/1*7haXXOJjZdibibU0c4eNgw.png" alt="Labeling GIF" width="800" height="500">
-</div>
-3. Faster R-CNN
-Architecture: Combines Region Proposal Networks (RPN) with Fast R-CNN. The RPN proposes regions, and the Fast R-CNN model classifies them and refines bounding boxes.
-<div align="center">
-  <img src="https://www.researchgate.net/publication/326668850/figure/fig1/AS:653294032666626@1532768843320/Faster-R-CNN-architecture-Top-left-box-represents-the-base-network-box-on-the-right.png" alt="Labeling GIF" width="800" height="500">
-</div>
-4. YOLO (You Only Look Once)
-Architecture: Divides the image into a grid and predicts bounding boxes and probabilities for each grid cell. Known for its speed.
-<div align="center">
-  <img src="https://editor.analyticsvidhya.com/uploads/1512812.png" alt="Labeling GIF" width="800" height="500">
-</div>
-5. SSD (Single Shot MultiBox Detector)
-Architecture: Detects objects in images using a single deep neural network, combining predictions from multiple feature maps with different resolutions.
-<div align="center">
-  <img src="https://miro.medium.com/v2/resize:fit:1400/1*La_I2VXlENAJ9r0Wpf_vMg.jpeg" alt="Labeling GIF" width="800" height="500">
-</div>
-
-<a name="part1.3"></a>
-Tools and Libraries
-In this section, we introduce the essential libraries used for object detection:
-OpenCV: An open-source computer vision library that provides tools for image processing.
-TensorFlow: A deep learning framework developed by Google, commonly used for machine learning tasks.
-PyTorch: An open-source machine learning library developed by Facebook, known for its dynamic computation graph.
-Detectron2: A PyTorch-based library developed by Facebook AI Research for object detection and segmentation.
-
-<a name="part2"></a>
-Data Preparation
-
-<a name="part2.1"></a>
-Data Formats
-There are several formats for object detection datasets, the most common being:
-1. COCO (Common Objects in Context)
-COCO is one of the most widely used data formats in object detection, known for its rich annotations which include object segmentation, keypoint detection, and captioning. A typical COCO dataset includes:
-Images: A list of images with metadata like file names and sizes.
-Annotations: Each annotation includes an image ID, category ID, bounding box coordinates, and segmentation information.
-Categories: A list of categories with IDs and names.
-Example of a COCO annotation:
-```json
-{
-  "images": [
-    {
-      "id": 123,
-      "width": 800,
-      "height": 600,
-      "file_name": "000000123.jpg"
-    }
-  ],
-  "annotations": [
-    {
-      "id": 456,
-      "image_id": 123,
-      "category_id": 1,
-      "bbox": [192, 78, 200, 300],
-      "segmentation": RLE or [polygon],
-      "area": 60000,
-      "iscrowd": 0
-    }
-  ],
-  "categories": [
-    {
-      "id": 1,
-      "name": "person"
-    }
-  ]
-}
-```
-Note: The `bbox` field contains the coordinates as [x, y, width, height].
 ---
 
-2. Pascal VOC (PASCAL Visual Object Classes)
-Pascal VOC is another popular format, particularly for earlier object detection challenges. It uses XML files to store annotation information for each image, including object class labels and bounding box coordinates.
-Example of a Pascal VOC annotation:
-```json
-<annotation>
-    <folder>VOC2012</folder>
-    <filename>000001.jpg</filename>
-    <size>
-        <width>800</width>
-        <height>600</height>
-        <depth>3</depth>
-    </size>
-    <object>
-        <name>person</name>
-        <pose>Unspecified</pose>
-        <truncated>0</truncated>
-        <difficult>0</difficult>
-        <bndbox>
-            <xmin>174</xmin>
-            <ymin>101</ymin>
-            <xmax>349</xmax>
-            <ymax>351</ymax>
-        </bndbox>
-    </object>
-</annotation>
-```
-Note: The `bndbox` contains the bounding box coordinates as [xmin, ymin, xmax, ymax].
+## 📖 Overview
+
+This project introduces the fundamentals of **Object Detection** and demonstrates how to fine-tune a pre-trained deep learning model for **license plate detection**.
+
+Object detection is one of the most important tasks in computer vision, enabling machines to identify and locate multiple objects within an image. This project combines both theory and hands-on implementation using modern deep learning techniques.
+
 ---
-4. Plain Text (.txt) Format (Used by YOLO)
-In YOLO (You Only Look Once), annotations are stored in plain text (.txt) files. Each image has a corresponding .txt file where each line represents one object in the image. The format typically includes the class ID and normalized bounding box coordinates (center x, center y, width, height).
-Example of a YOLO .txt annotation:
+
+## 🎯 Learning Objectives
+
+By the end of this project, you will understand:
+
+- Object Detection fundamentals
+- Key components of detection architectures
+- Popular object detection models
+- Dataset formats and annotation techniques
+- Model evaluation metrics
+- Inference using pre-trained models
+- Fine-tuning on custom datasets
+- License plate detection implementation
+
+---
+
+## 📑 Table of Contents
+
+- [Overview of Object Detection](#-overview-of-object-detection)
+- [Key Components of Object Detection Models](#-key-components-of-object-detection-models)
+- [Popular Object Detection Models](#-popular-object-detection-models)
+- [Tools and Libraries](#-tools-and-libraries)
+- [Data Preparation](#-data-preparation)
+  - [Data Formats](#data-formats)
+  - [Data Annotation](#data-annotation)
+- [Inference with Pre-trained Models](#-inference-with-pre-trained-models)
+- [Evaluation Metrics](#-evaluation-metrics)
+- [Fine-Tuning on License Plate Dataset](#-fine-tuning-on-license-plate-dataset)
+
+---
+
+# 🔍 Overview of Object Detection
+
+Object Detection is a computer vision task that identifies **what objects are present in an image** and **where they are located**.
+
+Unlike image classification, which assigns a single label to an image, object detection predicts:
+
+- Object class labels
+- Bounding box coordinates
+- Confidence scores
+
+### Common Applications
+
+- 🚘 Autonomous Vehicles
+- 🎥 Surveillance Systems
+- 📦 Inventory Management
+- 🏭 Industrial Inspection
+- 🔍 Visual Search Engines
+
+<p align="center">
+  <img src="https://www.ibm.com/content/dam/connectedassets-adobe-cms/worldwide-content/creative-assets/s-migr/ul/g/68/ae/object-detection-figure-1.component.complex-narrative-xl.ts=1713813010967.jpg/content/adobe-cms/us/en/topics/object-detection/jcr:content/root/table_of_contents/body/content_section_styled/content-section-body/complex_narrative/items/content_group_745532756/image" width="700">
+</p>
+
+---
+
+# 🧠 Key Components of Object Detection Models
+
+## 1. Feature Extraction
+
+Feature extraction is the process of learning meaningful visual patterns from images.
+
+### Common CNN Backbones
+
+- ResNet
+- VGG
+- MobileNet
+- EfficientNet
+
+Pre-trained models leverage knowledge learned from large datasets such as ImageNet, reducing training time and improving performance.
+
+---
+
+## 2. Region Proposal
+
+Region proposal methods identify potential object locations before classification.
+
+### Popular Approaches
+
+- Selective Search
+- Region Proposal Networks (RPNs)
+
+RPNs are commonly used in Faster R-CNN architectures.
+
+---
+
+## 3. Classification & Localization
+
+### Object Classification
+
+Assigns a class label to detected objects.
+
+### Bounding Box Regression
+
+Predicts object coordinates:
+
+```text
+[x, y, width, height]
 ```
+
+---
+
+## 4. Anchor Boxes
+
+Anchor boxes are predefined bounding boxes of varying sizes and aspect ratios used to detect objects at different scales.
+
+Commonly used in:
+
+- YOLO
+- SSD
+- Faster R-CNN
+
+---
+
+## 5. Loss Functions
+
+### Classification Loss
+
+Measures class prediction accuracy.
+
+### Localization Loss
+
+Measures bounding box prediction accuracy.
+
+### Total Loss
+
+Combines classification and localization losses into a single optimization objective.
+
+---
+
+## 6. Post-Processing
+
+### Non-Maximum Suppression (NMS)
+
+NMS removes duplicate detections and retains the most confident bounding boxes.
+
+---
+
+# 🚀 Popular Object Detection Models
+
+## R-CNN (Regions with CNN Features)
+
+### Characteristics
+
+- Uses Selective Search for region proposals
+- CNN extracts features
+- SVM performs classification
+
+<p align="center">
+  <img src="https://miro.medium.com/v2/resize:fit:640/format:webp/1*yJBiHhK8t_zTQKBqlZKlWQ.png" width="650">
+</p>
+
+---
+
+## Fast R-CNN
+
+### Improvements
+
+- Shared convolution computations
+- Faster training
+- ROI Pooling
+
+<p align="center">
+  <img src="https://miro.medium.com/v2/resize:fit:640/format:webp/1*7haXXOJjZdibibU0c4eNgw.png" width="650">
+</p>
+
+---
+
+## Faster R-CNN
+
+### Improvements
+
+- Introduces Region Proposal Networks (RPNs)
+- End-to-end training
+- Higher detection accuracy
+
+<p align="center">
+  <img src="https://www.researchgate.net/publication/326668850/figure/fig1/AS:653294032666626@1532768843320/Faster-R-CNN-architecture-Top-left-box-represents-the-base-network-box-on-the-right.png" width="650">
+</p>
+
+---
+
+## YOLO (You Only Look Once)
+
+### Strengths
+
+- Real-time detection
+- High speed
+- Single-stage architecture
+
+<p align="center">
+  <img src="https://editor.analyticsvidhya.com/uploads/1512812.png" width="650">
+</p>
+
+---
+
+## SSD (Single Shot MultiBox Detector)
+
+### Strengths
+
+- Single forward pass
+- Fast inference
+- Multi-scale feature maps
+
+<p align="center">
+  <img src="https://miro.medium.com/v2/resize:fit:1400/1*La_I2VXlENAJ9r0Wpf_vMg.jpeg" width="650">
+</p>
+
+---
+
+# 🛠️ Tools and Libraries
+
+| Library | Purpose |
+|----------|----------|
+| OpenCV | Image processing and computer vision |
+| TensorFlow | Deep learning framework |
+| PyTorch | Deep learning and research |
+| Detectron2 | Object detection and segmentation |
+
+---
+
+# 📂 Data Preparation
+
+## Data Formats
+
+Object detection datasets are stored in several annotation formats.
+
+### 1. COCO Format
+
+The most widely used object detection format.
+
+Includes:
+
+- Images
+- Annotations
+- Categories
+- Segmentation masks
+- Keypoints
+
+#### Bounding Box Format
+
+```text
+[x, y, width, height]
+```
+
+---
+
+### 2. Pascal VOC Format
+
+XML-based annotation format used in the PASCAL Visual Object Classes Challenge.
+
+#### Bounding Box Format
+
+```text
+[xmin, ymin, xmax, ymax]
+```
+
+---
+
+### 3. YOLO Format
+
+Text-based annotation format used by YOLO models.
+
+#### Structure
+
+```text
+<class_id> <x_center> <y_center> <width> <height>
+```
+
+#### Example
+
+```text
 0 0.4921875 0.3958333 0.25390625 0.375
 1 0.244140625 0.4708333 0.140625 0.175
 ```
----
-4. Custom datasets
-For projects that do not fit the standard datasets, custom annotations can be made. These might follow similar structures but often require additional setup or preprocessing to ensure compatibility with object detection models.
 
-<a name="part2.2"></a>
-Data Annotation
-Data annotation is the process of labeling images with bounding boxes and class labels. Tools used for data annotaion includes
-and are popular for this task. This
-LabelImg
-Computer Vision Annotation Tool (CVAT)
-VGG Image Annotator (VIA)
-Roboflow
-<div align="center">
-  <img src="https://blog.roboflow.com/content/images/2020/12/labeling.small-1.gif" alt="Labeling GIF" width="600" height="400">
-</div>
+---
+
+### 4. Custom Datasets
+
+Custom datasets often require additional preprocessing and annotation conversion before training.
+
+---
+
+## Data Annotation
+
+Data annotation involves labeling images with:
+
+- Bounding boxes
+- Class labels
+
+### Popular Annotation Tools
+
+| Tool | Description |
+|--------|-------------|
+| LabelImg | Simple image annotation tool |
+| CVAT | Advanced annotation platform |
+| Roboflow | Annotation and dataset management |
+| VIA | Lightweight browser-based annotation tool |
+
+<p align="center">
+  <img src="https://blog.roboflow.com/content/images/2020/12/labeling.small-1.gif" width="650">
+</p>
+
+---
+
+# 🤖 Inference with Pre-trained Models
+
+In this section, we use a pre-trained object detection model to perform inference on unseen images.
+
+Key steps include:
+
+1. Loading a trained model
+2. Preprocessing input images
+3. Running predictions
+4. Visualizing detected objects
+
+---
+
+# 📊 Evaluation Metrics
+
+Object detection performance is typically evaluated using:
+
+### Intersection over Union (IoU)
+
+Measures overlap between predicted and ground-truth bounding boxes.
+
+### Precision
+
+Measures the percentage of correct positive predictions.
+
+### Recall
+
+Measures the percentage of actual objects detected.
+
+### Mean Average Precision (mAP)
+
+The most widely used object detection metric.
+
+---
+
+# 🎯 Fine-Tuning on License Plate Dataset
+
+In the final section, we fine-tune a pre-trained object detection model on a custom License Plate Dataset.
+
+The workflow includes:
+
+- Dataset preparation
+- Annotation processing
+- Model training
+- Validation
+- Performance evaluation
+- Inference on test images
+
+---
+
+## 📌 Key Takeaways
+
+✅ Understanding Object Detection fundamentals
+
+✅ Exploring modern detection architectures
+
+✅ Working with common annotation formats
+
+✅ Evaluating detection performance
+
+✅ Fine-tuning models on custom datasets
+
+✅ Building a License Plate Detection system
+
+---
