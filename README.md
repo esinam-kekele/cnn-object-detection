@@ -1,11 +1,5 @@
 # 🚗 CNN Object Detection: License Plate Detection
 
-<p align="center">
-  <a href="https://colab.research.google.com/github/kekele-star/number-plate-detection/blob/main/train-set.ipynb">
-    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-  </a>
-</p>
-
 ---
 
 ## 📖 Overview
