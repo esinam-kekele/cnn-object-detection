@@ -58,9 +58,6 @@ Unlike image classification, which assigns a single label to an image, object de
 - 🏭 Industrial Inspection
 - 🔍 Visual Search Engines
 
-<p align="center">
-  <img src="https://www.ibm.com/content/dam/connectedassets-adobe-cms/worldwide-content/creative-assets/s-migr/ul/g/68/ae/object-detection-figure-1.component.complex-narrative-xl.ts=1713813010967.jpg/content/adobe-cms/us/en/topics/object-detection/jcr:content/root/table_of_contents/body/content_section_styled/content-section-body/complex_narrative/items/content_group_745532756/image" width="700">
-</p>
 
 ---
 
